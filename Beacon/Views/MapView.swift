@@ -12,6 +12,13 @@ import CoreLocation
 struct MapView: View {
     @Namespace private var locationBtn
     private let locationManager = CLLocationManager()
+    @State private var isSheetPresented = false
+
+    // Persisted map center and zoom (span)
+    @AppStorage("mapCenterLat") private var storedLat: Double = 60.3913
+    @AppStorage("mapCenterLon") private var storedLon: Double = 5.3221
+    @AppStorage("mapSpanLat") private var storedSpanLat: Double = 0.05
+    @AppStorage("mapSpanLon") private var storedSpanLon: Double = 0.05
 
     @State private var position: MapCameraPosition = .region(
         MKCoordinateRegion(
@@ -31,31 +38,29 @@ struct MapView: View {
 
             VStack {
                 HStack{
-                    Menu {
-                        Text("Hello")
-                        Text("Hello")
-                        Text("Hello")
+                    Button {
+                        isSheetPresented = true
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "list.bullet")
                         }
+                        .contentShape(Capsule())
                         .padding(.horizontal, 14)
                         .padding(.vertical, 16)
-                        .contentShape(Capsule())
                         .glassEffect()
                     }
 
                     SegmentPicker()
 
                     Button {
-                        // TODO: Add your refresh/rotate action here
+                        // TODO: Add fetch
                     } label: {
                         Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
                     }
-                    .padding(8)
+                    .padding(12)
                     .glassEffect()
                 }
-                .padding(.top, 50)
+                .padding(.top, 60)
                 .padding(.horizontal)
 
                 Spacer()
@@ -77,6 +82,29 @@ struct MapView: View {
         .onAppear {
             // Request permission
             locationManager.requestWhenInUseAuthorization()
+
+            // Initialize map position from persisted values
+            let region = MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: storedLat, longitude: storedLon),
+                span: MKCoordinateSpan(latitudeDelta: storedSpanLat, longitudeDelta: storedSpanLon)
+            )
+            position = .region(region)
+        }
+        // Persist camera/region updates using Map's dedicated callback
+        .onMapCameraChange(frequency: .continuous) { context in
+            let region = context.region
+            storedLat = region.center.latitude
+            storedLon = region.center.longitude
+            storedSpanLat = region.span.latitudeDelta
+            storedSpanLon = region.span.longitudeDelta
+
+            print("Saved map location -> center: (\(storedLat), \(storedLon)), span: (latDelta: \(storedSpanLat), lonDelta: \(storedSpanLon))")
+        }
+        .sheet(isPresented: $isSheetPresented) {
+            VStack(spacing: 16) {
+                PlacesListView()
+            }
+            .padding()
         }
     }
 }

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MineStederView: View {
     var body: some View {
-        Text("Mine Steder")
+        
     }
 }
 

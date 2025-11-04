@@ -24,27 +24,29 @@ struct SegmentPicker: View {
     }
 
     var body: some View {
-        HStack{
-            Picker("Places", selection: $selection) {
-                Image(systemName: "fork.knife")
-                    .renderingMode(.template)
-                    .accessibilityLabel(Text(PlaceType.restaurants.rawValue))
-                    .tag(PlaceType.restaurants)
-                
-                Image(systemName: "cup.and.heat.waves")
-                    .renderingMode(.template)
-                    .accessibilityLabel(Text(PlaceType.cafe.rawValue))
-                    .tag(PlaceType.cafe)
-                
-                Image(systemName: "bed.double")
-                    .renderingMode(.template)
-                    .accessibilityLabel(Text(PlaceType.hotels.rawValue))
-                    .tag(PlaceType.hotels)
+        VStack{
+            HStack{
+                Picker("Places", selection: $selection) {
+                    Image(systemName: "fork.knife")
+                        .renderingMode(.template)
+                        .accessibilityLabel(Text(PlaceType.restaurants.rawValue))
+                        .tag(PlaceType.restaurants)
+                    
+                    Image(systemName: "cup.and.heat.waves")
+                        .renderingMode(.template)
+                        .accessibilityLabel(Text(PlaceType.cafe.rawValue))
+                        .tag(PlaceType.cafe)
+                    
+                    Image(systemName: "bed.double")
+                        .renderingMode(.template)
+                        .accessibilityLabel(Text(PlaceType.hotels.rawValue))
+                        .tag(PlaceType.hotels)
+                }
+                .pickerStyle(.segmented)
             }
-            .pickerStyle(.segmented)
+            .padding(8)
+            .glassEffect()
         }
-        .padding(8)
-        .glassEffect()
     }
 }
 
