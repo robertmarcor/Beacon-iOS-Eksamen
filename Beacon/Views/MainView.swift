@@ -13,7 +13,7 @@ struct ContentView: View {
         {
           NavigationStack
           {
-            MapView()
+              MapView(mockPlaces: mockPlaces)
           }
           .tabItem
           {

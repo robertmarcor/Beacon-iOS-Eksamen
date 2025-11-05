@@ -5,10 +5,10 @@
 //  Created by Robert Marco Ramberg on 04/11/2025.
 //
 
-// PlacesViewModel.swift
+import SwiftUI
 import Foundation
 import CoreLocation
-internal import Combine
+import Combine
 
 @MainActor // required
 final class PlacesViewModel: ObservableObject {
@@ -17,13 +17,22 @@ final class PlacesViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
-    // simple inputs (you can expose setters or bind these from a view)
-    @Published var center = CLLocationCoordinate2D(latitude: 59.9139, longitude: 10.7522) // Oslo default
+    @AppStorage("cachedPlaces") private var cachedPlacesData: Data?
+
+    @Published var center = CLLocationCoordinate2D(latitude: 59.9139, longitude: 10.7522)
     @Published var categories: [String] = ["catering.cafe"]
     @Published var radius: Int = 1000
-    @Published var limit: Int = 5
-
-    /// Main load entry. Safe to call from `.task {}` or a button.
+    @Published var limit: Int = 10
+    
+    init() {
+        if let data = cachedPlacesData,
+           let decoded = try? JSONDecoder().decode([Place].self, from: data) {
+            self.places = decoded
+        } else {
+            print("No cached places found")
+        }
+    }
+    
     func load() async {
         isLoading = true
         errorMessage = nil
@@ -35,17 +44,35 @@ final class PlacesViewModel: ObservableObject {
                 category: categories,
                 limit: limit
             )
+            if let data = cachedPlacesData,
+               let decoded = try? JSONDecoder().decode([Place].self, from: data) {
+                self.places = decoded
+                print("✅ Loaded cached places (\(decoded.count)):")
+            }
+
+
         } catch {
             places = []
             errorMessage = error.localizedDescription
         }
         isLoading = false
+        print(String(
+            format: "Fetched %d places [%@] at %.5f, %.5f  radius:%d  limit:%d",
+            places.count,
+            categories.joined(separator: ","),
+            center.latitude,
+            center.longitude,
+            radius,
+            limit
+        ))
+
     }
 
-    /// Convenience helpers (optional)
-    func setCenter(_ coord: CLLocationCoordinate2D) { center = coord }
+    func setCenter(_ coord: CLLocationCoordinate2D) {
+        center = coord
+        print(String(format: "Center set %.5f, %.5f", center.latitude, center.longitude))
+    }
     func setCategory(_ single: String) { categories = [single] }
-    func addCategory(_ c: String) { if !categories.contains(c) { categories.append(c) } }
     func clear() { places = []; errorMessage = nil }
 }
 

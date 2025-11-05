@@ -13,15 +13,18 @@ enum PlaceType: String, CaseIterable {
     case hotels = "Hotels"
 }
 
-struct SegmentPicker: View {
-    @State private var selection: PlaceType = .restaurants
-    
-    init() {
-        let seg = UISegmentedControl.appearance()
-        seg.selectedSegmentTintColor = UIColor(named: "DeepBlue")
-        seg.setTitleTextAttributes([.foregroundColor: UIColor.highlightOrange], for: .selected)
-        seg.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .normal)
+extension PlaceType {
+    var geoapifyCategories: [String] {
+        switch self {
+        case .restaurants: return ["catering.restaurant"]
+        case .cafe:        return ["catering.cafe"]
+        case .hotels:      return ["accommodation.hotel"]
+        }
     }
+}
+
+struct SegmentPicker: View {
+    @Binding var selection: PlaceType
 
     var body: some View {
         VStack{
@@ -43,6 +46,12 @@ struct SegmentPicker: View {
                         .tag(PlaceType.hotels)
                 }
                 .pickerStyle(.segmented)
+                .onAppear {
+                    let seg = UISegmentedControl.appearance()
+                    seg.selectedSegmentTintColor = UIColor(named: "DeepBlue")
+                    seg.setTitleTextAttributes([.foregroundColor: UIColor.highlightOrange], for: .selected)
+                    seg.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .normal)
+                }
             }
             .padding(8)
             .glassEffect()
@@ -51,5 +60,5 @@ struct SegmentPicker: View {
 }
 
 #Preview {
-    SegmentPicker()
+    SegmentPicker(selection: .constant(.restaurants))
 }

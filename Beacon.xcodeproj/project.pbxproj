@@ -8,7 +8,6 @@
 
 /* Begin PBXFileReference section */
 		6D3923E42EB8510D00C12A91 /* Beacon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Beacon.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		6DD7764A2EB8C2E900A47E69 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -141,7 +140,8 @@
 /* Begin XCBuildConfiguration section */
 		6D3923ED2EB8510F00C12A91 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6DD7764A2EB8C2E900A47E69 /* Secrets.xcconfig */;
+			baseConfigurationReferenceAnchor = 6D3923E62EB8510D00C12A91 /* Beacon */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -263,7 +263,8 @@
 		};
 		6D3923F02EB8510F00C12A91 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6DD7764A2EB8C2E900A47E69 /* Secrets.xcconfig */;
+			baseConfigurationReferenceAnchor = 6D3923E62EB8510D00C12A91 /* Beacon */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
