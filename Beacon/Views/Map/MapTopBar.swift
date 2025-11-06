@@ -33,7 +33,7 @@ struct MapTopBar: View {
             }
         }
         .padding(.horizontal)
-        .padding(.top, 60)
+        .padding(.top, 50)
     }
 }
 

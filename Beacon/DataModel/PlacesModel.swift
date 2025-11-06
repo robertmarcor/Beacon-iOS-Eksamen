@@ -48,17 +48,7 @@ struct Place: Identifiable, Codable {
     var opening_hours: String? = ""
     let phone: String?
     let email: String?
-    var myRating: Rating?
-    
-    struct Rating: Codable {
-        var ratings: [Double]
-    }
-}
-extension Place {
-    var averageRating: Double {
-        guard let ratings = myRating?.ratings, !ratings.isEmpty else { return 0 }
-        return ratings.reduce(0, +) / Double(ratings.count)
-    }
+    let categories: [String]?
 }
 
 // For cleaner code since lon and lat are Doubles and not Coordinates

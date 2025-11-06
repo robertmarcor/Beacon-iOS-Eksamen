@@ -19,10 +19,7 @@ struct MapBottomBar: View {
             } label: {
                 Image(systemName: "magnifyingglass")
             }
-            .clipShape(Circle())
-            .padding(18)
-            .glassEffect()
-            .padding(.bottom, 8)
+
             Spacer()
             MapKit.MapUserLocationButton(scope: scope)
                 .tint(.beaconOrange)
@@ -30,7 +27,7 @@ struct MapBottomBar: View {
                 .padding(6)
                 .glassEffect()
         }
-        .padding(.bottom, 50)
+        .padding(.bottom, 80)
         .padding(.horizontal)
     }
 }

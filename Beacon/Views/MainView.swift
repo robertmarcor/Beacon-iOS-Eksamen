@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     var body: some View{
@@ -28,10 +29,28 @@ struct ContentView: View {
           {
             Label("Favoritter", systemImage: "heart")
           }
+            NavigationStack
+          {
+            RatingHistory()
+          }
+          .tabItem
+          {
+            Label("Rating", systemImage: "star")
+          }
         }
+        .tint(.highlightOrange)
     }
 }
 
 #Preview {
-    ContentView()
+    // Preview with the same environment as runtime so sheets won’t crash
+    let container = try! ModelContainer(
+        for: Rating.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    let store = RatingStore(context: ModelContext(container))
+
+    return ContentView()
+        .environmentObject(store)
+        .modelContainer(container)
 }

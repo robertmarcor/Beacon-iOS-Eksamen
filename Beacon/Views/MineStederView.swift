@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MineStederView: View {
+    
     var body: some View {
-        
+
     }
 }
 

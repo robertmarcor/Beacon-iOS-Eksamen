@@ -18,7 +18,7 @@ enum Geoapify{
         lon: Double,
         lat: Double,
         radius: Int = 1000,
-        category: [String] = ["accomodation.hotel"],
+        category: [String] = ["accommodation.hotel"],
         limit: Int = 10) async throws -> [Place]{
             // Bygge url
             var urlComps = URLComponents(string: "https://api.geoapify.com/v2/places")!
@@ -53,6 +53,7 @@ enum Geoapify{
                     opening_hours: feature.properties.opening_hours ?? "",
                     phone: feature.properties.contact?.phone,
                     email: feature.properties.contact?.email,
+                    categories: feature.properties.categories,
                 )
             }
 
@@ -287,3 +288,4 @@ private enum OpeningHoursParser {
         Day(rawValue: d.rawValue == 7 ? 1 : d.rawValue + 1)
     }
 }
+

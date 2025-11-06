@@ -116,7 +116,8 @@ struct MapView: View {
                 }
             }
             .sheet(item: $selectedPlace) { place in
-                PlaceSheet(place: place)
+                PlaceDetailedView(place: place)
+                    .environmentObject(vm)
                     .presentationDetents([.medium])
             }
     }

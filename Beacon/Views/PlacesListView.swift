@@ -33,12 +33,16 @@ struct PlacesListView: View {
                 } else {
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 12) {
+                            Text("\(displayedPlaces[0].categories![0]) places")
+                                .font(.title)
+                                .foregroundStyle(.beaconOrange)
                             ForEach(displayedPlaces) { p in
                                 VStack(alignment: .leading, spacing: 8) {
                                     HStack {
                                         Text(p.name)
                                             .font(.headline)
                                             .foregroundStyle(.beaconOrange)
+                                        
                                     }
                                     
                                     if let hours = p.opening_hours, !hours.isEmpty {
@@ -70,17 +74,14 @@ struct PlacesListView: View {
                                         .font(.caption2)
                                         .foregroundStyle(.secondary)
                                 }
+                                Divider()
                             }
                         }
                         .padding(.horizontal)
                     }
                     .toolbar {
-                        ToolbarItem(placement: .principal) {
                             SegmentPicker(selection: $selectedType)
-                        }
-                        ToolbarItem(placement: .topBarTrailing) {
                             FetchButton(vm: vm)
-                        }
                     }
                 }
             }
@@ -96,3 +97,4 @@ struct PlacesListView: View {
         mockPlaces: mockPlaces
     )
 }
+
