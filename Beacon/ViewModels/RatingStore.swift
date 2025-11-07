@@ -14,11 +14,11 @@ import Combine
 final class RatingStore: ObservableObject {
     
     private let context: ModelContext
-
+    
     init(context: ModelContext) {
         self.context = context
     }
-
+    
     func addRating(id: String, name:String ,value: Double) {
         context.insert(Rating(id: id, name: name, value: value))
         do {
@@ -28,7 +28,7 @@ final class RatingStore: ObservableObject {
             print("Save failed: \(error)")
         }
     }
-
+    
     func deleteRatings(ratings: [Rating]) {
         ratings.forEach { item in
             context.delete(item)

@@ -13,7 +13,9 @@ struct FetchButton: View {
     
     var body: some View {
         Button {
-            Task { await vm.load() }
+            Task {
+                await vm.load()
+            }
             withAnimation(.linear(duration: 0.6)) {
                 rotate = true
             }
@@ -22,7 +24,7 @@ struct FetchButton: View {
                 .rotationEffect(.degrees(rotate ? 360 : 0))
         }
         .padding(12)
-        .contentShape(Rectangle()) 
+        .contentShape(Rectangle()) // Easier tap
         .glassEffect()
     }
 }

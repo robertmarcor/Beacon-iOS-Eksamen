@@ -14,12 +14,7 @@ struct MapBottomBar: View {
     
     var body: some View {
         HStack{
-            Button {
-                isSearchPresented = true
-            } label: {
-                Image(systemName: "magnifyingglass")
-            }
-
+            SearchButton(isSearchPresented: $isSearchPresented)
             Spacer()
             MapKit.MapUserLocationButton(scope: scope)
                 .tint(.beaconOrange)

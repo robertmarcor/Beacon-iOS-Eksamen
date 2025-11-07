@@ -1,5 +1,5 @@
 //
-//  GeoapifyPlaces.swift
+//  PlacesAPI.swift
 //  Beacon
 //
 //  Created by Robert Marco Ramberg on 03/11/2025.
@@ -7,59 +7,57 @@
 
 import Foundation
 
-// Setter opp response modellen for å ta imot JSON fra geoapify
-// Fetch and mapping data to our model
-enum Geoapify{
-    // Grab our API key from Project
-    static var apiKey: String { Secrets.geoapifyAPIKey}
+struct PlacesAPI {
+    // API key from project secrets
+    static var apiKey: String { Secrets.geoapifyAPIKey }
     
-    // Building our URL with parameters as required by geoapify
+    // Fetch and map data to our Place model
     static func fetchPlaces(
         lon: Double,
         lat: Double,
         radius: Int = 1000,
         category: [String] = ["accommodation.hotel"],
-        limit: Int = 10) async throws -> [Place]{
-            // Bygge url
-            var urlComps = URLComponents(string: "https://api.geoapify.com/v2/places")!
-            urlComps.queryItems = [
-                .init(name: "apiKey", value: apiKey),
-                .init(name: "categories", value: category.joined(separator: ",")),
-                .init(name: "filter", value: "circle:\(lon),\(lat),\(radius)"),
-                .init(name: "bias", value: "proximity:\(lon),\(lat)"),
-                .init(name: "limit", value: String(limit))
-            ]
-            guard let url = urlComps.url else { throw URLError(.badURL) }
-            print("Geoapify request URL: \(url.absoluteString)")
-
-            // Swift fetch, throw error if bad url
-            let (data, response) = try await URLSession.shared.data(from: url)
-            guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-                throw URLError(.badServerResponse)
-            }
-            
-            // decode and map the response to our place struct
-            let dto = try JSONDecoder().decode(PlacesResponse.self, from: data)
-            return dto.features.map { feature in
-                let coords = feature.geometry.coordinates
-                return Place(
-                    id: feature.properties.place_id,
-                    name: feature.properties.name ?? "Unnamed",
-                    lat: coords.count > 1 ? coords[1] : 0,
-                    lon: coords.first ?? 0,
-                    address: feature.properties.formatted,
-                    website: feature.properties.website,
-                    distance: feature.properties.distance,
-                    opening_hours: feature.properties.opening_hours ?? "",
-                    phone: feature.properties.contact?.phone,
-                    email: feature.properties.contact?.email,
-                    categories: feature.properties.categories,
-                )
-            }
-
+        limit: Int = 10
+    ) async throws -> [Place] {
+        var components = URLComponents(string: "https://api.geoapify.com/v2/places")!
+        components.queryItems = [
+            URLQueryItem(name: "apiKey", value: apiKey),
+            URLQueryItem(name: "categories", value: category.joined(separator: ",")),
+            URLQueryItem(name: "filter", value: "circle:\(lon),\(lat),\(radius)"),
+            URLQueryItem(name: "bias", value: "proximity:\(lon),\(lat)"),
+            URLQueryItem(name: "limit", value: String(limit))
+        ]
+        
+        guard let url = components.url else {
+            throw URLError(.badURL)
         }
-    
+        print("Geoapify request URL: \(url.absoluteString)")
+        
+        let (data, response) = try await URLSession.shared.data(from: url)
+        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        
+        let dto = try JSONDecoder().decode(PlacesResponse.self, from: data)
+        return dto.features.map { feature in
+            let coords = feature.geometry.coordinates
+            return Place(
+                id: feature.properties.place_id,
+                name: feature.properties.name ?? "Unnamed",
+                lat: coords.count > 1 ? coords[1] : 0,
+                lon: coords.first ?? 0,
+                address: feature.properties.formatted,
+                website: feature.properties.website,
+                distance: feature.properties.distance,
+                opening_hours: feature.properties.opening_hours ?? "",
+                phone: feature.properties.contact?.phone,
+                email: feature.properties.contact?.email,
+                categories: feature.properties.categories
+            )
+        }
+    }
 }
+
 // AI Generert kode for å sjekke opening hours
 // MARK: - Opening hours parsing and status (device time zone, 60 min closesSoon)
 extension Place {
@@ -115,10 +113,8 @@ private enum OpeningHoursParser {
         // Split first on ';'
         var chunks = hoursString.split(separator: ";").map { String($0).trimmingCharacters(in: .whitespaces) }
         
-        // Some inputs use commas to separate rules too, e.g. "Su-Th 11:00-23:00, Fr,Sa 11:00-04:00"
-        // We’ll further split chunks where a comma is followed by a day token.
+        // Further split chunks where a comma is followed by a day token.
         func splitOnCommaDay(_ s: String) -> [String] {
-            // Look for occurrences of ", " followed by a day token (Mo|Tu|We|Th|Fr|Sa|Su)
             let pattern = #",\s+(Mo|Tu|We|Th|Fr|Sa|Su)\b"#
             guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return [s] }
             var parts: [String] = []
@@ -134,10 +130,8 @@ private enum OpeningHoursParser {
                 parts.append(prefix.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: ",")))
                 lastIndex = r.lowerBound
             }
-            // Append the tail
             let tail = String(s[lastIndex...])
             parts.append(tail.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: ",")))
-            // Clean empty
             return parts.filter { !$0.isEmpty }
         }
         
@@ -145,19 +139,15 @@ private enum OpeningHoursParser {
         
         // Each chunk like "Su-Th 11:00-23:00" or "Fr,Sa 11:00-04:00" or "Mo 09:00-21:00, 22:00-02:00"
         for chunk in chunks {
-            // Split days part and times part by first whitespace
             guard let spaceIdx = chunk.firstIndex(where: { $0.isWhitespace }) else { continue }
             let daysPart = String(chunk[..<spaceIdx]).trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: ","))
             let timesPart = String(chunk[spaceIdx...]).trimmingCharacters(in: .whitespacesAndNewlines)
             
-            // Parse days: can be "Su-Th" or "Fr,Sa" or single "Mo"
             let days = expandDays(from: daysPart)
             guard !days.isEmpty else { continue }
             
-            // timesPart can contain multiple intervals separated by commas
             let timeRanges = timesPart.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
             for tr in timeRanges {
-                // Expect "HH:mm-HH:mm"
                 let comps = tr.split(separator: "-").map { String($0).trimmingCharacters(in: .whitespaces) }
                 guard comps.count == 2,
                       let start = minutes(fromHHmm: comps[0]),
@@ -165,16 +155,12 @@ private enum OpeningHoursParser {
                 else { continue }
                 
                 if start <= end {
-                    // Same-day interval
                     for d in days {
                         schedule[d, default: []].append(Interval(startMinutes: start, endMinutes: end))
                     }
                 } else {
-                    // Overnight interval: split across day and next day
                     for d in days {
-                        // Part 1: today start -> 24:00
                         schedule[d, default: []].append(Interval(startMinutes: start, endMinutes: 24*60))
-                        // Part 2: next day 00:00 -> end
                         if let next = nextDay(after: d) {
                             schedule[next, default: []].append(Interval(startMinutes: 0, endMinutes: end))
                         }
@@ -183,14 +169,13 @@ private enum OpeningHoursParser {
             }
         }
         
-        // Sort and merge overlapping intervals per day for safety
+        // Sort and merge overlapping intervals per day
         for d in Day.allCases {
             if var arr = schedule[d] {
                 arr.sort { $0.startMinutes < $1.startMinutes }
                 var merged: [Interval] = []
                 for iv in arr {
                     if let last = merged.last, iv.startMinutes <= last.endMinutes {
-                        // overlap/adjacent: merge
                         let newEnd = max(last.endMinutes, iv.endMinutes)
                         merged.removeLast()
                         merged.append(Interval(startMinutes: last.startMinutes, endMinutes: newEnd))
@@ -218,7 +203,6 @@ private enum OpeningHoursParser {
         
         let todays = schedule[currentDay] ?? []
         
-        // Determine if open and when it closes
         var isOpen = false
         var closesAtMinutes: Int?
         for iv in todays {
@@ -232,7 +216,6 @@ private enum OpeningHoursParser {
         if isOpen, let closeMin = closesAtMinutes {
             let remaining = closeMin - nowMinutes
             let closesSoon = remaining <= closesSoonThresholdMinutes
-            // Build closesAt Date
             var closeComps = comps
             closeComps.hour = closeMin / 60
             closeComps.minute = closeMin % 60
@@ -255,7 +238,6 @@ private enum OpeningHoursParser {
     }
     
     private static func expandDays(from token: String) -> [Day] {
-        // token could be "Su-Th", "Fr,Sa", "Mo"
         var days: [Day] = []
         let list = token.split(separator: ",").map { String($0) }
         for item in list {
@@ -269,7 +251,6 @@ private enum OpeningHoursParser {
                 days.append(d)
             }
         }
-        // Deduplicate while preserving order
         var seen = Set<Int>()
         let unique = days.filter { seen.insert($0.rawValue).inserted }
         return unique
@@ -279,7 +260,6 @@ private enum OpeningHoursParser {
         if start.rawValue <= end.rawValue {
             return (start.rawValue...end.rawValue).compactMap { Day(rawValue: $0) }
         } else {
-            // wrap around week (e.g., Fr-Su)
             return (start.rawValue...7).compactMap { Day(rawValue: $0) } + (1...end.rawValue).compactMap { Day(rawValue: $0) }
         }
     }
@@ -288,4 +268,3 @@ private enum OpeningHoursParser {
         Day(rawValue: d.rawValue == 7 ? 1 : d.rawValue + 1)
     }
 }
-

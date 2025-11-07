@@ -12,9 +12,9 @@ struct PlaceTypeHeaderView: View {
     
     var body: some View {
         HStack{
-            emojiView(for: selectedType)
+            CategoryEmoji(type: selectedType)
                 .id(selectedType)
-
+            
             Text(selectedType.rawValue)
                 .font(.title).bold()
                 .foregroundStyle(.beaconOrange)
@@ -22,18 +22,6 @@ struct PlaceTypeHeaderView: View {
         .padding(.horizontal)
         .padding(.vertical, 3)
         .glassEffect()
-    }
-}
-
-@ViewBuilder
-private func emojiView(for type: PlaceType) -> some View {
-    switch type {
-    case .cafe:
-        CafeEmojiView()
-    case .hotels:
-        HotelEmojiView()
-    case .restaurants:
-        RestaurantEmojiView()
     }
 }
 

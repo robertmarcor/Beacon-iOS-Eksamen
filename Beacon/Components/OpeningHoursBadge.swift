@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct OpeningHoursBadge: View {
+    
     let place: Place
     
     var body: some View {

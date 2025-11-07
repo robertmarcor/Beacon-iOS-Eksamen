@@ -29,7 +29,7 @@ struct MapTopBar: View {
                 }
                 SegmentPicker(selection: $selectedType)
                 FetchButton(vm: vm)
-
+                
             }
         }
         .padding(.horizontal)

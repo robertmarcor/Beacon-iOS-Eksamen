@@ -11,7 +11,7 @@ import SwiftData
 struct RatingHistory: View {
     @EnvironmentObject private var ratingStore: RatingStore
     @Query(sort: \Rating.id) private var data: [Rating]
-
+    
     var body: some View {
         List {
             if data.isEmpty {
@@ -31,9 +31,11 @@ struct RatingHistory: View {
         }
         .navigationTitle("Mine Steder")
         .onAppear{
-            ratingStore.addRating(id: "1a", name: "TestButikk", value: 3.0)
-            ratingStore.addRating(id: "1a", name: "TestButikk", value: 3.0)
-            ratingStore.addRating(id: "1a", name: "TestButikk", value: 3.0)
+            if data.isEmpty{
+                ratingStore.addRating(id: "1", name: "Test", value: 3.0)
+                ratingStore.addRating(id: "1", name: "Test1", value: 3.0)
+                ratingStore.addRating(id: "2", name: "Test2", value: 3.0)
+            }
         }
     }
 }

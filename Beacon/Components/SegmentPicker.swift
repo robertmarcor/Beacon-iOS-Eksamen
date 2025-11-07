@@ -25,7 +25,7 @@ extension PlaceType {
 
 struct SegmentPicker: View {
     @Binding var selection: PlaceType
-
+    
     var body: some View {
         VStack{
             HStack{
@@ -47,6 +47,7 @@ struct SegmentPicker: View {
                 }
                 .pickerStyle(.segmented)
                 .onAppear {
+                    // Custom Picker Styling
                     let seg = UISegmentedControl.appearance()
                     seg.selectedSegmentTintColor = UIColor(named: "DeepBlue")
                     seg.setTitleTextAttributes([.foregroundColor: UIColor.highlightOrange], for: .selected)

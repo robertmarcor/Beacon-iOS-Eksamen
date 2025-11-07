@@ -12,17 +12,20 @@ import SwiftData
 struct BeaconApp: App {
     private let container: ModelContainer
     private let ratingStore: RatingStore
-
+    @StateObject private var placesVM = PlacesViewModel()
+    
     init() {
         // One shared container for the entire app
-        self.container = try! ModelContainer(for: Rating.self)
+        // Extend to include FavoritePlace as well
+        self.container = try! ModelContainer(for: Rating.self, FavoritePlace.self)
         self.ratingStore = RatingStore(context: ModelContext(container))
     }
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
                 .environmentObject(ratingStore)
+                .environmentObject(placesVM)
                 .modelContainer(container)
         }
     }

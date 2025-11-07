@@ -13,7 +13,7 @@ final class Rating {
     var id: String
     var name: String
     var value: Double
-
+    
     init(id: String, name: String, value: Double) {
         self.id = id
         self.name = name

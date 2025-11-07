@@ -22,6 +22,7 @@ struct PlaceRatingView: View {
                 .font(.headline)
             
             HStack(spacing: 12) {
+                // Loop giving each star its own number, 1-5. Tap 3rd star = 3.0
                 ForEach(1...5, id: \.self) { star in
                     Image(systemName: star <= Int(selectedRating) ? "star.fill" : "star")
                         .resizable()
@@ -32,7 +33,6 @@ struct PlaceRatingView: View {
                         .onTapGesture {
                             selectedRating = Double(star)
                         }
-                        .accessibilityLabel("\(star) star\(star > 1 ? "s" : "")")
                 }
             }
             .padding(.vertical, 8)
@@ -46,6 +46,7 @@ struct PlaceRatingView: View {
                 
                 Spacer()
                 
+                // Call our RatingStore
                 Button("Submit") {
                     ratingStore.addRating(id: placeId, name: placeName ,value: selectedRating )
                     selectedRating = 0
@@ -66,8 +67,8 @@ struct PlaceRatingView: View {
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
     let store = RatingStore(context: ModelContext(container))
-
+    
     return PlaceRatingView(placeId: "a1", placeName: "Sample Place")
-        .environmentObject(store)   // inject the env object
-        .modelContainer(container)  // same container instance
+        .environmentObject(store)
+        .modelContainer(container)
 }

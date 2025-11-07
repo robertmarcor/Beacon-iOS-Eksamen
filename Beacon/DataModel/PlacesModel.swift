@@ -30,7 +30,7 @@ struct PlacesResponse: Decodable{
         let phone: String?
         let email: String?
     }
-
+    
     struct Geometry: Decodable {
         let coordinates: [Double]
     }

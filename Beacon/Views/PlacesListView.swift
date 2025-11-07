@@ -7,19 +7,23 @@
 
 import SwiftUI
 import MapKit
+import SwiftData
 
 struct PlacesListView: View {
     @ObservedObject var vm: PlacesViewModel
     @Binding var isSheetPresented: Bool
     @Binding var selectedType: PlaceType
+    @Binding var selectedPlace: Place?
     
     @State var mockPlaces: [Place]
-
+    
+    @Environment(\.modelContext) private var modelContext
+    
     //MARK: Remove in the future, just dummy data for styling
     private var displayedPlaces: [Place] {
         vm.places.isEmpty ? mockPlaces : vm.places
     }
-
+    
     var body: some View {
         NavigationView {
             Group {
@@ -33,58 +37,65 @@ struct PlacesListView: View {
                 } else {
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 12) {
-                            Text("\(displayedPlaces[0].categories![0]) places")
-                                .font(.title)
-                                .foregroundStyle(.beaconOrange)
-                            ForEach(displayedPlaces) { p in
-                                VStack(alignment: .leading, spacing: 8) {
-                                    HStack {
-                                        Text(p.name)
-                                            .font(.headline)
-                                            .foregroundStyle(.beaconOrange)
+                            ForEach(displayedPlaces) { place in
+                                Button {
+                                    selectedPlace = place
+                                    isSheetPresented = false
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        HStack {
+                                            Text(place.name)
+                                                .font(.headline)
+                                                .foregroundStyle(.beaconOrange)
+                                            Spacer()
+                                            LikeButton(place: place)
+                                        }
                                         
-                                    }
-                                    
-                                    if let hours = p.opening_hours, !hours.isEmpty {
-                                        OpeningHoursBadge(place: p)
-                                        Text("Opening Hours")
-                                            .font(.footnote.bold())
-                                            .foregroundStyle(.secondary)
+                                        if let hours = place.opening_hours, !hours.isEmpty {
+                                            OpeningHoursBadge(place: place)
+                                            Text("Opening Hours")
+                                                .font(.footnote.bold())
+                                                .foregroundStyle(.secondary)
+                                            
+                                            Text(
+                                                hours
+                                                    .replacingOccurrences(of: ";", with: "\n")
+                                                    .components(separatedBy: .newlines)
+                                                    .map { $0.trimmingCharacters(in: .whitespaces) }
+                                                    .joined(separator: "\n")
+                                            )
+                                            .font(.subheadline)
+                                        }
                                         
-                                        Text(
-                                            hours
-                                                .replacingOccurrences(of: ";", with: "\n")
-                                                .components(separatedBy: .newlines)
-                                                .map { $0.trimmingCharacters(in: .whitespaces) }
-                                                .joined(separator: "\n")
-                                        )
-                                        .font(.subheadline)
-                                    }
-                                    
-                                    Text("Distance: \(p.distance)m")
-                                        .font(.subheadline)
-                                    
-                                    if let addr = p.address {
-                                        Text(addr)
-                                            .font(.caption)
+                                        Text("Distance: \(place.distance)m")
+                                            .font(.subheadline)
+                                        
+                                        if let addr = place.address {
+                                            Text(addr)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        
+                                        Text(String(format: "%.5f, %.5f", place.lat, place.lon))
+                                            .font(.caption2)
                                             .foregroundStyle(.secondary)
                                     }
-                                    
-                                    Text(String(format: "%.5f, %.5f", p.lat, p.lon))
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
                                 }
+                                .buttonStyle(.plain)
                                 Divider()
                             }
                         }
                         .padding(.horizontal)
                     }
                     .toolbar {
-                            SegmentPicker(selection: $selectedType)
-                            FetchButton(vm: vm)
+                        SegmentPicker(selection: $selectedType)
+                        FetchButton(vm: vm)
                     }
                 }
             }
+        }
+        .onAppear {
+            vm.setModelContext(modelContext)
         }
     }
 }
@@ -94,6 +105,7 @@ struct PlacesListView: View {
         vm: PlacesViewModel(),
         isSheetPresented: .constant(false),
         selectedType: .constant(PlaceType.restaurants),
+        selectedPlace: .constant(nil),
         mockPlaces: mockPlaces
     )
 }
