@@ -4,6 +4,8 @@
 //
 //  Created by Robert Marco Ramberg on 06/11/2025.
 //
+// Hindsight: would be to maybe just make favorites into a bool on
+// place model instead of its own model
 
 import Foundation
 import SwiftData

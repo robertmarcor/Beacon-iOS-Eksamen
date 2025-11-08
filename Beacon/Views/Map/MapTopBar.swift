@@ -14,7 +14,7 @@ struct MapTopBar: View {
     
     var body: some View {
         VStack{
-            PlaceTypeHeaderView(selectedType: $selectedType)
+            CategoryHeader(selectedType: $selectedType)
             HStack{
                 Button {
                     isSheetPresented = true

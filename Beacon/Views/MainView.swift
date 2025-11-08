@@ -41,6 +41,7 @@ struct MainView: View {
             {
                 Label("Rating", systemImage: "star")
             }
+            
         }
         .task {
             vm.setModelContext(modelContext)

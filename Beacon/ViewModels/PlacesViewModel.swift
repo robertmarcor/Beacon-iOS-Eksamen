@@ -96,6 +96,8 @@ final class PlacesViewModel: ObservableObject {
     func clear() { places = []; errorMessage = nil }
     
     // MARK: - Favorites (SwiftData)
+    // Hindsight: would be to maybe just make favorites into a bool on
+    // place model instead of its own model
     
     func isFavorite(_ place: Place) -> Bool {
         favorites.contains(where: { $0.id == place.id })
